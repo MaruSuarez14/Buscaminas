@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="buscaminas_configuracion">
+    <meta name="author" content="Maru">
+    <link rel="stylesheet" href="../css/styles.css">
+    <title>Buscaminas</title>
+
+</head>
+
+<body>
+    <header id="header">
+        <!--Logo del juego y menú-->
+        <div class="container">
+            <div class="logo">
+                <a href="Juego.html"><img src="../assets/logo.png" alt="Logo" width="50" height="50"> </a>
+            </div>
+            <div class="titulo">
+                <h1> BUSCAMINAS </h1>
+            </div>
+
+        </div>
+        <nav id="nav">
+            <ul class="navegador">
+                <li><a href="QuienesSomos.html"> Quienes Somos</a></li>
+                <li><a href="Ayuda.html"> Ayuda </a></li>
+                <li><a href="Configuracion.html"> Configuracion </a></li>
+                <li><a href="Contacto.html"> Contacto </a></li>
+            </ul>
+        </nav>
+
+    </header>
+
+    <main>
+        <div class="configuracion">
+            <!--Configuración del juego con opciones básicas-->
+            <form method="post" action="#">
+                <h2> Configuración predefinida </h2>
+
+                <label> Dificultad
+                    <select name="dificultad">
+                        <option value="1"> Principiante (8 x 8 casillas y 10 minas) </option>
+                        <option value="2"> Intermedio (16 x 16 casillas y 40 minas) </option>
+                        <option value="3"> Experto (16 x 30 casillas y 99 minas) </option>
+                    </select>
+                </label> <br>
+
+                <!--Configuración personalizada del juego-->
+
+                <h2> Configuración personalizada</h2>
+
+                Numero de minas <input type="number" name="minas" placeholder="1" min="1" max="99"> <br>
+                <label> Tamaño del tablero
+                    <select name="tamaño">
+                        <option value="facil"> 8 x 8 casillas </option>
+                        <option value="medio"> 16 x 16 casillas </option>
+                        <option value="dificil"> 16 x 30 casillas </option>
+                    </select>
+                </label> <br>
+                Tiempo de resolución <input type="number" name="tiempo" placeholder="30" min="30" max="900"><br>
+                <input class="boton" type="submit" value="Aceptar">
+                <input class="boton" type="reset" value="Cancelar">
+            </form>
+        </div>
+
+    </main>
+
+    <footer id="footer">
+        <!--Logo y breve descripción del juego-->
+        <div class="container">
+            <div class="presentacion">
+                <section>
+                    <div class="titulo">
+                        <a href="Juego.html"><img src="../assets/logo.png" alt="Logo" width="30" height="30"> </a>
+                        <h3> Buscaminas </h3>
+                    </div>
+                    <div class="descripcion">
+                        <p> Buscaminas es un videojuego para un jugador creado por Curt Johnson y Robert Donner, cuyo
+                            objetivo es despejar un campo de minas sin detonar ninguna.
+                        </p>
+                        <!--Copyright-->
+                        <div>
+                            <p> &copy; Copyright 2021 Buscaminas. Todos los derechos reservados </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="menu">
+                <section>
+                    <h3>Menú</h3>
+                    <ul class="footer_menu">
+                        <li><a href="QuienesSomos.html"> Quienes Somos</a></li>
+                        <li><a href="Ayuda.html"> Ayuda </a></li>
+                        <li><a href="Configuracion.html"> Configuracion </a></li>
+                        <li><a href="Contacto.html"> Contacto </a></li>
+                    </ul>
+                </section>
+            </div>
+            <div class="redes">
+                <section>
+                    <h3> Redes sociales </h3>
+                    <ul class="r_sociales">
+                        <li> <a href="https://twitter.com/?lang=es" target="_blank"><img src="../assets/LogoTwitter.jpg"
+                                    alt="Logo Twitter" width="30" height="30"></a></li>
+                        <li> <a href="https://es-es.facebook.com/" target="_blank"><img src="../assets/LogoFacebook.png"
+                                    alt="Logo Facebook" width="30" height="30"></a></li>
+                        <li> <a href=" https://www.instagram.com/?hl=es" target="blank"><img
+                                    src="../assets/LogoInstagram.png" alt="Logo Instagram" width="30" height="30"></a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+
+</html>

@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+body{
+  background-color: #0b568fda;
+  background-image: url("https://www.transparenttextures.com/patterns/old-wall.png");
+}
+input, select {
+  margin: 10px 0px;
+}
+main{
+  padding: 24px;
+}
+h2{
+  padding: 20px 0 20px 0;
+}
+iframe{
+  width: 100%;
+  
+}
+@media (min-width: 900px){
+  iframe{
+    width: 40%;
+  }
+  
+}
+li:hover{
+  background-color: rgba(0, 0, 255, 0.411);
+  transition: 1s;
+}
+
+/**********
+  Header 
+***********/
+#header .container{
+  display: flex;
+  flex-direction: row;
+  padding: 20px;
+  justify-content: center;
+}
+#header .container .logo{
+  padding: 20px;
+}
+#header .container .titulo{
+  padding: 20px;
+}
+
+#nav .navegador{
+  font-size: 16px;
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  background-color: #518cb9;
+}
+#nav ul li{
+  display: flex;
+  flex-basis: 50%;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+ }
+
+ #nav a{
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+}
+
+/* Juego */
+/*canvas{
+  width: 900px;
+  height: 900px;
+  border: 1px solid black;
+}
+*/
+
+/* Ayuda */
+
+.ayuda img{
+  margin: 14px 0;
+}
+
+.ayuda p{
+  line-height: 2;
+}
+
+/* Quienes Somos */
+
+.quienes_somos .container{
+  display: flex;
+  flex-direction: row;
+}
+.quienes_somos .container .descripcion{
+  padding:40px 170px 40px 40px;
+}
+
+/* Contacto y Configuración */
+ 
+.boton{
+  padding:4px;
+}
+
+/**********
+  Footer
+***********/
+
+#footer .container{
+  background-color: #518cb9;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 20px;
+}
+
+#footer .container .titulo{
+  display: flex;
+  flex-direction: row;
+}
+
+/* Descripcion */ 
+
+
+#footer .container .presentacion p{
+  padding: 20px 0 20px 0;
+}
+#footer .container .presentacion section {
+  display: flex;
+  flex-direction: column;
+}
+  
+
+  /* Menu */ 
+
+#footer .container .menu .footer_menu {
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+  list-style: none;  
+}
+
+#footer .container .menu .footer_menu a {
+  text-decoration: none;
+  color: black;
+}
+
+#footer .container .menu .footer_menu li {
+  padding: 5px;
+}
+
+/* Redes sociales */ 
+
+#footer .container .redes .r_sociales{
+  display: flex;
+  flex-direction: row;
+  list-style: none;
+  padding-top: 10px;
+}
+#footer .container .redes ul li{
+  display: flex;
+  padding: 10px;
+}

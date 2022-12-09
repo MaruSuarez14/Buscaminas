@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="buscaminas_juego">
+    <meta name="author" content="Maru">
+    <link rel="stylesheet" href="../css/styles.css">
+    <title>Buscaminas</title>
+</head>
+
+<body>
+    <header id="header">
+        <!--Logo del juego y menú-->
+        <div class="container">
+            <div class="logo">
+                <a href="Juego.html"><img src="../assets/logo.png" alt="Logo" width="50" height="50"> </a>
+            </div>
+            <div class="titulo">
+                <h1> BUSCAMINAS </h1>
+            </div>
+
+        </div>
+        <nav id="nav">
+            <ul class="navegador">
+                <li><a href="QuienesSomos.html"> Quienes Somos</a></li>
+                <li><a href="Ayuda.html"> Ayuda </a></li>
+                <li><a href="Configuracion.html"> Configuracion </a></li>
+                <li><a href="Contacto.html"> Contacto </a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!--Canvas donde se diseñará el juego-->
+    <p style="font-size: 20px">
+        Introduce un nombre:
+        <input type="text" id="name"><br>
+        Dificultad:
+        <select id="dificultad">
+            <option id="principiante" value="1"> Principiante (8 x 8 casillas y 10 minas) </option>
+            <option id="intermedio" value="2"> Intermedio (16 x 16 casillas y 40 minas) </option>
+            <option id="experto" value="3"> Experto (16 x 30 casillas y 99 minas) </option>
+        </select>
+    </p>
+    <p style="font-size: 12px">(Si se desea cambiar la dificultad en mitad del juego será necesario reiniciarlo)</p>  
+    <p style="margin:10px">
+        <button style="font-size: 20px" type="button" onclick="gameStart()">Empezar partida</button>
+        <button style="font-size: 20px" type="button" onclick="location.reload()">Reiniciar partida</button>
+    </p>
+    <p style="font-size: 20px">
+        Tiempo: <span id="timer"></span><br>
+        Banderas disponibles: <span id="totalFlags"> </span>
+    </p>
+
+    <p style="font-size: 20px"> Resolución de partida: <span id="gameOver"></span></p>
+
+    <canvas height="500" width="500" id="canvas"></canvas><br>
+    <p style="font-size: 26px">Ranking</p>
+    <p style="font-size: 20px">
+        Nombre: <span id="top1_name"></span>
+        Tiempo: <span id="top1_time"></span>
+    </p>
+
+    <img src="../assets/numero_1.png" alt="1" style="display: none">
+    <img src="../assets/numero_2.png" alt="2" style="display: none">
+    <img src="../assets/numero_3.png" alt="3" style="display: none">
+    <img src="../assets/numero_4.png" alt="4" style="display: none">
+    <img src="../assets/numero_5.png" alt="4" style="display: none">
+    <img src="../assets/numero_6.png" alt="4" style="display: none">
+    <img src="../assets/bandera.png" alt="4" style="display: none">
+
+    <script>
+        //Clase Cell
+        class Cell {
+            constructor(mine, flag, open) {
+                this.mine = mine;
+                this.flag = flag;
+                this.open = open;
+            }
+        }
+        class Player {
+            constructor(name, time) {
+                this.name = name;
+                this.time = time;
+            }
+        }
+        //Variables globales 
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        let columns;
+        let rows;
+        let totalMines;
+        let cellWidth;
+        let cellHeight;
+        let board;
+        let drawnFlags = 0;
+        let totalFlags = 0;
+        let timeCount = 0;
+        let timer;
+        let player;
+        let isBoard = true;
+        let ranking;
+        let level;
+        const mine = new Image();
+        mine.src = "../assets/logo.png";
+
+        //Determina la configuración del tablero (tamaño, número de minas, etc.) e inicia el juego
+        function gameStart() {
+            //Reiniciamos el contador para que no se acumule cada vez que se inicie la partida
+            if (timer > 0) {
+                clearInterval(timer);
+                timeCount = 0;
+            }
+            //Dependiendo de la dificultad se establecen unas medidas y número de minas
+            let difficulty = document.getElementById("dificultad").value;
+            if (difficulty == "3") {
+                rows = 16;
+                columns = 30;
+                totalMines = 99;
+                level = "difficult";
+
+            } else if (difficulty == "2") {
+                rows = 16;
+                columns = 16;
+                totalMines = 40;
+                level = "medium";
+
+            } else {
+                rows = 8;
+                columns = 8;
+                totalMines = 10;
+                level = "easy";
+            }
+            let playerName = document.getElementById("name").value;
+            if (playerName == '') playerName = "defaultName";
+            player = new Player(playerName, 0);
+            createBoard();
+            cellWidth = canvas.width / columns;
+            cellHeight = canvas.height / rows;
+            drawBoard();
+            plantBombs();
+            //Asigna el número total de banderas disponibles
+            totalFlags = totalMines;
+            document.getElementById("totalFlags").innerHTML = totalFlags
+            //Contador de tiempo
+            let time = document.getElementById("timer");
+            timer = setInterval(function () {
+                time.innerHTML = timeCount;
+                timeCount++;
+            }, 1000);
+            drawRanking();
+        }
+
+        //Creación del tablero (array)
+        function createBoard() {
+            board = new Array(rows);
+            //Creación del array bidimensional que representa el tablero
+            for (let i = 0; i < rows; i++) {
+                board[i] = new Array(columns)
+            }
+            //Creación del objeto Cell en cada posición del array 
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < columns; j++) {
+                    board[i][j] = new Cell(false, false, false);
+                }
+            }
+        }
+
+        //Función encargada de establecer en "true" el atributo "mine" de la clase Cell aleatoriamente en tantas posiciones del
+        //array comno el número recibido por parámetro 
+        function plantBombs() {
+            for (let i = 0; i < totalMines;) {
+                let row = Math.floor(Math.random() * rows);
+                let column = Math.floor(Math.random() * columns);
+                if (!board[row][column].mine) {
+                    board[row][column].mine = true;
+                    i++;
+                }
+            }
+        }
+
+        //Controlador del click izquierdo y derecho del ratón 
+        canvas.addEventListener("mousedown", function (event) {
+            const boundingRect = canvas.getBoundingClientRect();
+            const x = event.clientX - boundingRect.left;
+            const y = event.clientY - boundingRect.top;
+            const col = Math.floor(x / cellWidth);
+            const row = Math.floor(y / cellHeight);
+
+            //Comprobamos que el elemento con id "gameOver" no tenga contenido, por tanto significa que la partida aún no ha empezado
+            //y entramos en la función para jugar, de lo contrario cuando "gameOver" no esté vacio "bloquearemos" la jugabilidad
+            if (document.getElementById("gameOver").textContent == '') {
+                if (event.button == 0 && !board[row][col].flag) {
+                    //Si en la casilla actual hay una mina se pierde automáticamente. 
+                    if (board[row][col].mine) {
+                        ctx.drawImage(mine, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        drawMines();
+                        document.getElementById("gameOver").innerHTML = "Has perdido";
+                        clearInterval(timer);
+                        //Si no hay una mina, contaremos el número de minas que hay alrededor de dicha casilla.     
+                    } else {
+                        let numberOfMines = countMines(board, row, col);
+                        if (numberOfMines == 0) countMinesAroundZeros(board, row, col);
+                        else {
+                            drawImageOnBoard(numberOfMines, col, row);
+                        }
+                        //Se comprueba si se ha ganado
+                        checkWin();
+                    }
+
+                    //Condición si se pulsa el boton derecho del ratón en una casilla y está no esta descubierta
+                } else if (event.button == 2 && !board[row][col].open) {
+                    //Si ya hay una bandera, se quitará la imagen 
+                    if (board[row][col].flag) {
+                        board[row][col].flag = false;
+                        ctx.fillStyle = "white";
+                        ctx.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                        drawBoard();
+                        drawnFlags--;
+                        totalFlags++;
+                        document.getElementById("totalFlags").innerHTML = totalFlags;
+                        //Si no hay ninguna bandera, se dibuja la imagen de una bandera    
+                    } else {
+                        if (drawnFlags < totalMines) {
+                            board[row][col].flag = true;
+                            const flag = new Image();
+                            flag.src = "../assets/bandera.png";
+                            ctx.drawImage(flag, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                            drawnFlags++;
+                            totalFlags--;
+                            document.getElementById("totalFlags").innerHTML = totalFlags;
+                        }
+
+                    }
+                }
+            }
+
+        });
+
+        //Esta función cuenta el número de minas que hay alrededor de una casilla
+        function countMines(board, posRow, posCol) {
+            let countMine = 0;
+            for (let i = posRow - 1; i <= posRow + 1; i++) {
+                if (i >= 0 && i <= rows - 1) {
+                    for (let j = posCol - 1; j <= posCol + 1; j++) {
+                        if (j >= 0 && j <= columns - 1) {
+                            if (board[i][j].mine) countMine++;
+                        }
+                    }
+                }
+            }
+            return countMine;
+        }
+
+        //Esta función se encarga de contar el número de minas alrededor de las casillas que no tienen ninguna bomba cerca
+        function countMinesAroundZeros(board, posRow, posCol) {
+            board[posRow][posCol].open = true;
+            ctx.fillStyle = "gray";
+            ctx.fillRect(posCol * cellWidth, posRow * cellHeight, cellWidth, cellHeight);
+            for (let i = posRow - 1; i <= posRow + 1; i++) {
+                if (i >= 0 && i <= rows - 1) {
+                    for (let j = posCol - 1; j <= posCol + 1; j++) {
+                        if (j >= 0 && j <= columns - 1) {
+                            if (countMines(board, i, j) == 0 && !board[i][j].open) {
+                                board[i][j].open = true;
+                                countMinesAroundZeros(board, i, j);
+                            } else if (countMines(board, i, j) > 0 && !board[i][j].open) {
+                                board[i][j].open = true;
+                                drawImageOnBoard(countMines(board, i, j), j, i);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //Método encargado de dibujar la imagen de la mina
+        function drawMines() {
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < columns; j++) {
+                    if (board[i][j].mine) {
+                        //Si hay una bandera, ésta se elimina 
+                        if (board[i][j].flag) {
+                            ctx.fillStyle = "white";
+                            ctx.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                            drawBoard();
+                        }
+                        //Se dibuja la imagen de la bomba
+                        ctx.drawImage(mine, j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                    }
+                }
+            }
+        }
+        //Esta función comprueba si el jugador ha ganado comparando el número de minas totales con el número de casillas no descubiertas
+        //(atributo "open" es false)
+        function checkWin() {
+            let closedCells = 0;
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < columns; j++) {
+                    if (!board[i][j].open) closedCells++;
+                }
+            }
+            if (closedCells == totalMines) {
+                document.getElementById("gameOver").innerHTML = "Has ganado";
+                player.time = timeCount;
+                if (level == 'easy') {
+                    let bestPlayerTime = localStorage.getItem("easyTop_time");
+                    if (player.time < bestPlayerTime || bestPlayerTime == undefined) {
+                        localStorage.setItem("easyTop_name", player.name);
+                        localStorage.setItem("easyTop_time", player.time);
+                    }
+
+                } else if (level == 'medium') {
+                    let bestPlayerTime = localStorage.getItem("mediumTop_time");
+                    if (player.time < bestPlayerTime || bestPlayerTime == undefined) {
+                        localStorage.setItem("mediumTop_name", player.name);
+                        localStorage.setItem("mediumTop_time", player.time);
+                    }
+
+                } else if (level = 'difficult') {
+                    let bestPlayerTime = localStorage.getItem("difficultTop_time");
+                    if (player.time < bestPlayerTime || bestPlayerTime == undefined) {
+                        localStorage.setItem("difficultTop_name", player.name);
+                        localStorage.setItem("difficultTop_time", player.time);
+                    }
+
+                }
+
+                drawRanking();
+                clearInterval(timer);
+            }
+        }
+
+        //Muestra el ranking de mejores jugadas
+        function drawRanking() {
+            if (level == 'easy') {
+                document.getElementById("top1_name").innerHTML = localStorage.getItem("easyTop_name");
+                document.getElementById("top1_time").innerHTML = localStorage.getItem("easyTop_time");
+            } else if (level == 'medium') {
+                document.getElementById("top1_name").innerHTML = localStorage.getItem("mediumTop_name");
+                document.getElementById("top1_time").innerHTML = localStorage.getItem("mediumTop_time");
+            } else if (level == 'difficult') {
+                document.getElementById("top1_name").innerHTML = localStorage.getItem("difficultTop_name");
+                document.getElementById("top1_time").innerHTML = localStorage.getItem("difficultTop_time");
+            }
+
+        }
+
+        //Según el número de minas que haya alrededor, se dibuja la imagen de el número correspondiente
+        function drawImageOnBoard(numberOfMines, col, row) {
+            var count = new Image();
+            board[row][col].open = true;
+            //Si hay una bandera, se elimina
+            if (board[row][col].flag) {
+                board[row][col].flag = false;
+                ctx.fillStyle = "white";
+                ctx.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                drawBoard();
+            }
+            if (numberOfMines == 1) {
+                count.src = "../assets/numero_1.png";
+                ctx.drawImage(count, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+            } else if (numberOfMines == 2) {
+                count.src = "../assets/numero_2.png";
+                ctx.drawImage(count, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+            } else if (numberOfMines == 3) {
+                count.src = "../assets/numero_3.png";
+                ctx.drawImage(count, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+            } else if (numberOfMines == 4) {
+                count.src = "../assets/numero_4.png";
+                ctx.drawImage(count, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+            } else if (numberOfMines == 5) {
+                count.src = "../assets/numero_5.png";
+                ctx.drawImage(count, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+            } else if (numberOfMines == 6) {
+                count.src = "../assets/numero_6.png";
+                ctx.drawImage(count, col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+            }
+        }
+
+
+        canvas.addEventListener("contextmenu", function (event) {
+            event.preventDefault();
+        });
+
+
+        //Dibuja las líneas interiores del tablero
+        function drawBoard() {
+            if (isBoard) {
+                ctx.fillStyle = "white";
+                ctx.fillRect(0, 0, columns * cellWidth, rows * cellHeight);
+                isBoard = false;
+            }
+            for (let row = 0; row <= rows; row += 1) {
+                const y = row * cellHeight;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            for (let column = 0; column <= columns; column += 1) {
+                const x = column * cellWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+        }
+
+    </script>
+
+    <footer id="footer">
+        <!--Logo y breve descripción del juego-->
+        <div class="container">
+            <div class="presentacion">
+                <section>
+                    <div class="titulo">
+                        <a href="Juego.html"><img src="../assets/logo.png" alt="Logo" width="30" height="30"> </a>
+                        <h3> Buscaminas </h3>
+                    </div>
+                    <div class="descripcion">
+                        <p> Buscaminas es un videojuego para un jugador creado por Curt Johnson y Robert Donner, cuyo
+                            objetivo es despejar un campo de minas sin detonar ninguna.
+                        </p>
+                        <!--Copyright-->
+                        <div>
+                            <p> &copy; Copyright 2021 Buscaminas. Todos los derechos reservados </p>
+
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="menu">
+                <section>
+                    <h3>Menú</h3>
+                    <ul class="footer_menu">
+                        <li><a href="QuienesSomos.html"> Quienes Somos</a></li>
+                        <li><a href="Ayuda.html"> Ayuda </a></li>
+                        <li><a href="Configuracion.html"> Configuracion </a></li>
+                        <li><a href="Contacto.html"> Contacto </a></li>
+                    </ul>
+                </section>
+            </div>
+            <div class="redes">
+                <section>
+                    <h3> Redes sociales </h3>
+                    <ul class="r_sociales">
+                        <li> <a href="https://twitter.com/?lang=es" target="_blank"><img src="../assets/LogoTwitter.jpg"
+                                    alt="Logo Twitter" width="30" height="30"></a></li>
+                        <li> <a href="https://es-es.facebook.com/" target="_blank"><img src="../assets/LogoFacebook.png"
+                                    alt="Logo Facebook" width="30" height="30"></a></li>
+                        <li> <a href=" https://www.instagram.com/?hl=es" target="blank"><img
+                                    src="../assets/LogoInstagram.png" alt="Logo Instagram" width="30" height="30"></a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </footer>
+
+
+</body>
+
+
+</html>
